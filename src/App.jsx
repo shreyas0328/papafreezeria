@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera, Text, Text3D, Center, useGLTF, Float } from '@react-three/drei'
+import { OrbitControls, Text, Float, SpotLight, useHelper } from '@react-three/drei'
+import * as THREE from 'three'
 import './App.css'
 
 const CUSTOMERS = [
@@ -99,131 +100,82 @@ function Customer({ position, customerData, isLeaving }) {
   
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // Add subtle floating animation
       groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1
     }
   })
-
-  const skinColors = {
-    Mandi: "#ffdbac",
-    Tony: "#c68642",
-    Prudence: "#e0ac69",
-    Cooper: "#8d5524",
-    Penny: "#ffd5b3",
-    Rico: "#bb9167",
-    Marty: "#e6b89c",
-    Clover: "#ffe0bd",
-    Utah: "#c68642",
-    Robby: "#ae7343"
-  }
-
-  const hairColors = {
-    Mandi: "#4a3000",
-    Tony: "#1a1a1a",
-    Prudence: "#cc0000",
-    Cooper: "#663300",
-    Penny: "#ffcc00",
-    Rico: "#000000",
-    Marty: "#4d2600",
-    Clover: "#009933",
-    Utah: "#996633",
-    Robby: "#666666"
-  }
-
-  const clothingColors = {
-    Mandi: "#ff69b4",
-    Tony: "#2e2e2e",
-    Prudence: "#4a90e2",
-    Cooper: "#8b4513",
-    Penny: "#9370db",
-    Rico: "#ff4500",
-    Marty: "#20b2aa",
-    Clover: "#32cd32",
-    Utah: "#daa520",
-    Robby: "#4682b4"
-  }
 
   return (
     <group ref={groupRef} position={position}>
       {/* Body */}
       <mesh castShadow>
         <capsuleGeometry args={[0.5, 1, 8, 16]} />
-        <meshStandardMaterial color={clothingColors[customerData.name]} />
+        <meshStandardMaterial 
+          color="#4a90e2"
+          roughness={0.2}
+          metalness={0.3}
+        />
       </mesh>
       
       {/* Head */}
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <sphereGeometry args={[0.4, 32, 32]} />
-        <meshStandardMaterial color={skinColors[customerData.name]} />
-      </mesh>
+      <group position={[0, 1.2, 0]}>
+        {/* Base head */}
+        <mesh castShadow>
+          <sphereGeometry args={[0.4, 32, 32]} />
+          <meshStandardMaterial 
+            color="#ffdbac"
+            roughness={0.3}
+            metalness={0.1}
+          />
+        </mesh>
+        
+        {/* Eyes */}
+        <group position={[0, 0, 0.3]}>
+          <mesh position={[-0.15, 0, 0]}>
+            <sphereGeometry args={[0.08, 16, 16]} />
+            <meshStandardMaterial color="#2c3e50" />
+          </mesh>
+          <mesh position={[0.15, 0, 0]}>
+            <sphereGeometry args={[0.08, 16, 16]} />
+            <meshStandardMaterial color="#2c3e50" />
+          </mesh>
+        </group>
 
-      {/* Hair */}
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <sphereGeometry args={[0.42, 32, 32]} />
-        <meshStandardMaterial color={hairColors[customerData.name]} />
-      </mesh>
-
-      {/* Eyes */}
-      <group position={[0, 1.2, 0.3]}>
-        <mesh position={[-0.15, 0, 0]}>
-          <sphereGeometry args={[0.08, 16, 16]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[0.15, 0, 0]}>
-          <sphereGeometry args={[0.08, 16, 16]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        {/* Pupils */}
-        <mesh position={[-0.15, 0, 0.05]}>
-          <sphereGeometry args={[0.04, 16, 16]} />
-          <meshStandardMaterial color="black" />
-        </mesh>
-        <mesh position={[0.15, 0, 0.05]}>
-          <sphereGeometry args={[0.04, 16, 16]} />
-          <meshStandardMaterial color="black" />
+        {/* Smile */}
+        <mesh position={[0, -0.1, 0.3]} rotation={[0, 0, Math.PI * 0.1]}>
+          <torusGeometry args={[0.15, 0.03, 16, 16, Math.PI]} />
+          <meshStandardMaterial color="#e74c3c" />
         </mesh>
       </group>
 
       {/* Speech bubble */}
       <Float
         speed={2}
-        rotationIntensity={0}
+        rotationIntensity={0.2}
         floatIntensity={0.2}
         position={[0, 2.5, 0]}
       >
         <group>
-          {/* Bubble background */}
           <mesh>
-            <boxGeometry args={[4, 1.5, 0.1]} />
-            <meshStandardMaterial color="white" metalness={0.2} roughness={0.1} />
+            <boxGeometry args={[4, 1.4, 0.1]} />
+            <meshStandardMaterial 
+              color="white"
+              transparent
+              opacity={0.8}
+            />
           </mesh>
-          
-          {/* Bubble tail */}
-          <mesh position={[0, -0.9, 0]}>
-            <cylinderGeometry args={[0.2, 0, 0.4, 4]} rotation={[0, Math.PI/4, 0]} />
-            <meshStandardMaterial color="white" metalness={0.2} roughness={0.1} />
-          </mesh>
-
-          {/* Cipher text */}
           <Text
             position={[0, 0.2, 0.06]}
-            fontSize={0.25}
+            fontSize={0.2}
             maxWidth={3.5}
             textAlign="center"
-            color="#2d3436"
-            font="/fonts/Righteous-Regular.ttf"
-            anchorY="middle"
+            color="#2c3e50"
           >
             {customerData.cipherText}
           </Text>
-
-          {/* Customer name */}
           <Text
             position={[0, -0.3, 0.06]}
-            fontSize={0.2}
-            color="#636e72"
-            font="/fonts/Righteous-Regular.ttf"
-            anchorY="middle"
+            fontSize={0.15}
+            color="#7f8c8d"
           >
             {customerData.name}
           </Text>
@@ -233,109 +185,74 @@ function Customer({ position, customerData, isLeaving }) {
   )
 }
 
-function Blender({ position }) {
+function CafeDecor() {
   return (
-    <group position={position}>
-      {/* Blender base */}
-      <mesh castShadow>
-        <cylinderGeometry args={[0.3, 0.4, 0.3, 16]} />
-        <meshStandardMaterial color="#2c3e50" metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Blender jar */}
-      <mesh position={[0, 0.6, 0]} castShadow>
-        <cylinderGeometry args={[0.25, 0.3, 0.8, 16]} />
-        <meshStandardMaterial color="#b8e994" transparent opacity={0.6} metalness={0.1} roughness={0.1} />
-      </mesh>
-      {/* Blender lid */}
-      <mesh position={[0, 1, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.28, 0.1, 16]} />
-        <meshStandardMaterial color="#2c3e50" metalness={0.8} roughness={0.2} />
-      </mesh>
-    </group>
-  )
-}
+    <group>
+      {/* Hanging Lamps */}
+      {[-3, 0, 3].map((x, i) => (
+        <group key={i} position={[x, 3, -1]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 0.5, 16]} />
+            <meshStandardMaterial color="#2c3e50" />
+          </mesh>
+          <mesh position={[0, -0.5, 0]} castShadow>
+            <cylinderGeometry args={[0.3, 0.2, 0.4, 16]} />
+            <meshStandardMaterial 
+              color="#f1c40f"
+              emissive="#f1c40f"
+              emissiveIntensity={0.5}
+            />
+          </mesh>
+          <pointLight
+            position={[0, -0.5, 0]}
+            intensity={0.5}
+            distance={5}
+            color="#f1c40f"
+          />
+        </group>
+      ))}
 
-function IceCreamCup({ position }) {
-  return (
-    <group position={position}>
-      {/* Cup */}
-      <mesh castShadow>
-        <cylinderGeometry args={[0.2, 0.15, 0.4, 16]} />
-        <meshStandardMaterial color="#f5d6ba" metalness={0.1} roughness={0.8} />
-      </mesh>
-      {/* Ice cream */}
-      <mesh position={[0, 0.3, 0]} castShadow>
-        <sphereGeometry args={[0.2, 16, 16]} />
-        <meshStandardMaterial color="#fff5e6" metalness={0.1} roughness={0.6} />
-      </mesh>
-      {/* Whipped cream */}
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <coneGeometry args={[0.15, 0.3, 16]} />
-        <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.6} />
-      </mesh>
-      {/* Cherry */}
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <sphereGeometry args={[0.06, 16, 16]} />
-        <meshStandardMaterial color="#ff4757" metalness={0.3} roughness={0.7} />
-      </mesh>
-    </group>
-  )
-}
+      {/* Wall Decorations */}
+      {[-6, -2, 2, 6].map((x, i) => (
+        <group key={i} position={[x, 2, -4.8]}>
+          <mesh castShadow>
+            <boxGeometry args={[1.5, 2, 0.1]} />
+            <meshStandardMaterial 
+              color="#34495e"
+              metalness={0.3}
+              roughness={0.7}
+            />
+          </mesh>
+          <Text
+            position={[0, 0, 0.06]}
+            fontSize={0.2}
+            color="#ecf0f1"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {['DECODE', 'CIPHER', 'SECRET', 'SOLVE'][i]}
+          </Text>
+        </group>
+      ))}
 
-function ToppingsContainer({ position, color, label }) {
-  return (
-    <group position={position}>
-      {/* Container */}
-      <mesh castShadow>
-        <boxGeometry args={[0.4, 0.3, 0.4]} />
-        <meshStandardMaterial color="#34495e" metalness={0.5} roughness={0.5} />
-      </mesh>
-      {/* Lid */}
-      <mesh position={[0, 0.2, 0]} castShadow>
-        <boxGeometry args={[0.42, 0.1, 0.42]} />
-        <meshStandardMaterial color={color} metalness={0.3} roughness={0.7} />
-      </mesh>
-      {/* Label */}
-      <Text
-        position={[0, 0, 0.21]}
-        fontSize={0.08}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {label}
-      </Text>
+      {/* Plants */}
+      {[-8, 8].map((x, i) => (
+        <group key={i} position={[x, -1.5, -4]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.4, 0.3, 0.8, 16]} />
+            <meshStandardMaterial color="#95a5a6" />
+          </mesh>
+          {[0, 0.2, -0.2, 0.1, -0.1].map((offset, j) => (
+            <group key={j} position={[offset, 0.4, offset]}>
+              <mesh castShadow>
+                <sphereGeometry args={[0.3, 16, 16]} />
+                <meshStandardMaterial color="#27ae60" />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      ))}
     </group>
-  )
-}
-
-function SyrupBottle({ position, color }) {
-  return (
-    <group position={position}>
-      {/* Bottle */}
-      <mesh castShadow>
-        <cylinderGeometry args={[0.1, 0.15, 0.5, 16]} />
-        <meshStandardMaterial color={color} metalness={0.3} roughness={0.6} />
-      </mesh>
-      {/* Cap */}
-      <mesh position={[0, 0.3, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.08, 0.1, 16]} />
-        <meshStandardMaterial color="#2c3e50" metalness={0.5} roughness={0.5} />
-      </mesh>
-    </group>
-  )
-}
-
-function Floor() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial 
-        color="#a0522d"
-        metalness={0.2}
-        roughness={0.8}
-      />
-    </mesh>
   )
 }
 
@@ -347,49 +264,103 @@ function Counter() {
         <boxGeometry args={[8, 2, 2]} />
         <meshStandardMaterial 
           color="#8b4513"
-          metalness={0.2}
           roughness={0.8}
+          metalness={0.2}
         />
       </mesh>
+
       {/* Counter top */}
       <mesh position={[0, 1.1, 0]} castShadow receiveShadow>
         <boxGeometry args={[8.4, 0.2, 2.4]} />
         <meshStandardMaterial 
           color="#deb887"
+          roughness={0.2}
           metalness={0.3}
-          roughness={0.6}
-        />
-      </mesh>
-      {/* Counter details */}
-      <mesh position={[0, 0, 1.1]} castShadow>
-        <boxGeometry args={[8, 1.8, 0.1]} />
-        <meshStandardMaterial 
-          color="#6d4c41"
-          metalness={0.1}
-          roughness={0.9}
         />
       </mesh>
 
-      {/* Add Freezeria items */}
-      <group position={[0, 1.2, 0]}>
-        {/* Blenders */}
-        <Blender position={[-3, 0, 0]} />
-        <Blender position={[-2, 0, 0]} />
-        
-        {/* Sample drinks */}
-        <IceCreamCup position={[2, 0, 0]} />
-        <IceCreamCup position={[2.5, 0, 0.3]} />
-        
-        {/* Toppings containers */}
-        <ToppingsContainer position={[-1, 0, 0]} color="#e84393" label="Sprinkles" />
-        <ToppingsContainer position={[-0.5, 0, 0]} color="#ffeaa7" label="Nuts" />
-        <ToppingsContainer position={[0, 0, 0]} color="#6c5ce7" label="Cookies" />
-        
-        {/* Syrup bottles */}
-        <SyrupBottle position={[1, 0, -0.5]} color="#e17055" />
-        <SyrupBottle position={[1.2, 0, -0.5]} color="#fdcb6e" />
-        <SyrupBottle position={[1.4, 0, -0.5]} color="#00b894" />
+      {/* Counter front decorative panel */}
+      <mesh position={[0, 0, 1.01]} castShadow>
+        <planeGeometry args={[7.8, 1.8]} />
+        <meshStandardMaterial 
+          color="#6d4c41"
+          roughness={0.7}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Coffee machines and equipment */}
+      <group position={[0, 1.2, -0.8]}>
+        {/* Coffee machine */}
+        <mesh castShadow>
+          <boxGeometry args={[1.5, 1, 0.8]} />
+          <meshStandardMaterial 
+            color="#2c3e50"
+            metalness={0.8}
+            roughness={0.2}
+          />
+        </mesh>
+        {/* Steam wand */}
+        <mesh position={[0.6, -0.2, 0.2]} rotation={[0, 0, Math.PI / 4]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.4, 8]} />
+          <meshStandardMaterial 
+            color="#95a5a6"
+            metalness={0.9}
+            roughness={0.1}
+          />
+        </mesh>
       </group>
+
+      {/* Display case */}
+      <group position={[-2.5, 1.2, -0.5]}>
+        <mesh castShadow>
+          <boxGeometry args={[2, 0.8, 1]} />
+          <meshStandardMaterial 
+            color="#ecf0f1"
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+function Floor() {
+  return (
+    <group>
+      {/* Main floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
+        <planeGeometry args={[20, 20]} />
+        <meshStandardMaterial 
+          color="#34495e"
+          roughness={0.8}
+          metalness={0.2}
+        />
+      </mesh>
+
+      {/* Decorative floor pattern */}
+      {Array.from({ length: 10 }).map((_, i) =>
+        Array.from({ length: 10 }).map((_, j) => (
+          <mesh
+            key={`${i}-${j}`}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[
+              -9 + i * 2,
+              -1.99,
+              -9 + j * 2
+            ]}
+            receiveShadow
+          >
+            <planeGeometry args={[1.8, 1.8]} />
+            <meshStandardMaterial 
+              color={((i + j) % 2 === 0) ? "#2c3e50" : "#34495e"}
+              roughness={0.7}
+              metalness={0.3}
+            />
+          </mesh>
+        ))
+      )}
     </group>
   )
 }
@@ -397,61 +368,73 @@ function Counter() {
 function Walls() {
   return (
     <group>
-      {/* Back wall */}
+      {/* Back wall with texture */}
       <mesh position={[0, 3, -5]} receiveShadow>
         <boxGeometry args={[20, 10, 0.3]} />
         <meshStandardMaterial 
           color="#87ceeb"
+          roughness={0.9}
           metalness={0.1}
-          roughness={0.7}
         />
       </mesh>
-      {/* Left wall */}
-      <mesh position={[-10, 3, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
-        <boxGeometry args={[10, 10, 0.3]} />
-        <meshStandardMaterial 
-          color="#87ceeb"
-          metalness={0.1}
-          roughness={0.7}
-        />
-      </mesh>
-      {/* Right wall */}
-      <mesh position={[10, 3, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
-        <boxGeometry args={[10, 10, 0.3]} />
-        <meshStandardMaterial 
-          color="#87ceeb"
-          metalness={0.1}
-          roughness={0.7}
-        />
-      </mesh>
-      {/* Wall decorations */}
-      <mesh position={[0, 4, -4.8]} receiveShadow>
-        <boxGeometry args={[3, 2, 0.1]} />
-        <meshStandardMaterial 
-          color="#4a4a4a"
-          metalness={0.3}
-          roughness={0.6}
-        />
-      </mesh>
+
+      {/* Side walls with windows */}
+      {[-10, 10].map((x, i) => (
+        <group key={i}>
+          <mesh position={[x, 3, 0]} rotation={[0, Math.PI / 2 * (i ? -1 : 1), 0]} receiveShadow>
+            <boxGeometry args={[10, 10, 0.3]} />
+            <meshStandardMaterial 
+              color="#87ceeb"
+              roughness={0.9}
+              metalness={0.1}
+            />
+          </mesh>
+          {/* Windows */}
+          {[-2, 2].map((z, j) => (
+            <mesh 
+              key={j}
+              position={[x * 0.99, 3, z]} 
+              rotation={[0, Math.PI / 2 * (i ? -1 : 1), 0]}
+            >
+              <planeGeometry args={[3, 4]} />
+              <meshStandardMaterial 
+                color="#b8e6ff"
+                transparent
+                opacity={0.3}
+                metalness={0.9}
+                roughness={0.1}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
     </group>
   )
 }
 
 function Scene({ currentCustomer, customerPosition, isLeaving }) {
+  const spotLightRef = useRef()
+  useHelper(spotLightRef, THREE.SpotLightHelper, 'white')
+
   return (
     <>
       <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[5, 8, 5]}
-        intensity={1}
+      <SpotLight
+        ref={spotLightRef}
+        position={[0, 5, 0]}
+        angle={0.6}
+        penumbra={0.5}
+        intensity={1.2}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize={[2048, 2048]}
       />
-      <pointLight position={[0, 4, 0]} intensity={0.5} />
+      {/* Add additional accent lights */}
+      <pointLight position={[-5, 4, -3]} intensity={0.5} color="#ffd700" />
+      <pointLight position={[5, 4, -3]} intensity={0.5} color="#ff8c00" />
       <Floor />
       <Counter />
       <Walls />
+      <CafeDecor />
       {currentCustomer && (
         <Customer
           position={customerPosition}
@@ -466,20 +449,41 @@ function Scene({ currentCustomer, customerPosition, isLeaving }) {
 export default function App() {
   const [score, setScore] = useState(0)
   const [currentCustomer, setCurrentCustomer] = useState(null)
-  const [customerPosition, setCustomerPosition] = useState([0, -0.5, -3]) // Customer appears in front of counter
+  const [customerPosition, setCustomerPosition] = useState([0, -0.5, -3])
   const [isLeaving, setIsLeaving] = useState(false)
   const [userInput, setUserInput] = useState('')
   const [gameState, setGameState] = useState('waiting')
   const [feedback, setFeedback] = useState('')
+  const [solvedCustomers, setSolvedCustomers] = useState(new Set())
+  const [skippedCustomers, setSkippedCustomers] = useState([])
 
   useEffect(() => {
     if (!currentCustomer && gameState === 'waiting') {
       setTimeout(() => {
-        const randomCustomer = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)]
-        setCurrentCustomer(randomCustomer)
+        // Filter out solved customers and get available ones
+        const availableCustomers = CUSTOMERS.filter(
+          customer => !solvedCustomers.has(customer.id) && !skippedCustomers.includes(customer.id)
+        )
+        
+        if (availableCustomers.length === 0) {
+          // If all customers are either solved or skipped, bring back skipped ones
+          setSkippedCustomers([])
+          const onlyUnsolvedCustomers = CUSTOMERS.filter(
+            customer => !solvedCustomers.has(customer.id)
+          )
+          if (onlyUnsolvedCustomers.length === 0) {
+            setFeedback('Congratulations! You solved all ciphers!')
+            return
+          }
+          const randomCustomer = onlyUnsolvedCustomers[Math.floor(Math.random() * onlyUnsolvedCustomers.length)]
+          setCurrentCustomer(randomCustomer)
+        } else {
+          const randomCustomer = availableCustomers[Math.floor(Math.random() * availableCustomers.length)]
+          setCurrentCustomer(randomCustomer)
+        }
+        
         setGameState('entering')
         
-        // Animate customer entering from far away
         let pos = -8
         const enterInterval = setInterval(() => {
           if (pos >= -3) {
@@ -492,7 +496,33 @@ export default function App() {
         }, 50)
       }, 1500)
     }
-  }, [currentCustomer, gameState])
+  }, [currentCustomer, gameState, solvedCustomers, skippedCustomers])
+
+  const handleCustomerLeave = (wasSkipped = false) => {
+    setGameState('leaving')
+    setIsLeaving(true)
+    
+    if (wasSkipped) {
+      setSkippedCustomers(prev => [...prev, currentCustomer.id])
+      setFeedback('Customer skipped!')
+    }
+    
+    let pos = -3
+    const leaveInterval = setInterval(() => {
+      if (pos <= -8) {
+        clearInterval(leaveInterval)
+        setCurrentCustomer(null)
+        setUserInput('')
+        setIsLeaving(false)
+        setGameState('waiting')
+        setCustomerPosition([0, -0.5, -3])
+        setTimeout(() => setFeedback(''), 2000)
+      } else {
+        pos -= 0.2
+        setCustomerPosition([0, -0.5, pos])
+      }
+    }, 50)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -502,25 +532,8 @@ export default function App() {
       const points = currentCustomer.difficulty * 100
       setScore(prevScore => prevScore + points)
       setFeedback(`Correct! +${points} points`)
-      setGameState('leaving')
-      setIsLeaving(true)
-      
-      // Animate customer leaving
-      let pos = -3
-      const leaveInterval = setInterval(() => {
-        if (pos <= -8) {
-          clearInterval(leaveInterval)
-          setCurrentCustomer(null)
-          setUserInput('')
-          setIsLeaving(false)
-          setGameState('waiting')
-          setCustomerPosition([0, -0.5, -3])
-          setTimeout(() => setFeedback(''), 2000)
-        } else {
-          pos -= 0.2
-          setCustomerPosition([0, -0.5, pos])
-        }
-      }, 50)
+      setSolvedCustomers(prev => new Set([...prev, currentCustomer.id]))
+      handleCustomerLeave(false)
     } else {
       setFeedback('Try again!')
       const input = document.querySelector('.cipher-input')
@@ -529,8 +542,14 @@ export default function App() {
     }
   }
 
+  const handleSkip = () => {
+    if (gameState === 'serving') {
+      handleCustomerLeave(true)
+    }
+  }
+
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '100vw', height: '100vh', background: '#1a1a1a' }}>
       <div className="game-ui">
         <h1>Papa's Cipher Shop</h1>
         <div className="score">Score: {score}</div>
@@ -571,6 +590,14 @@ export default function App() {
             disabled={gameState !== 'serving'}
           >
             Submit Answer
+          </button>
+          <button 
+            type="button" 
+            className="skip-btn"
+            onClick={handleSkip}
+            disabled={gameState !== 'serving'}
+          >
+            Skip Customer
           </button>
         </form>
       </div>
