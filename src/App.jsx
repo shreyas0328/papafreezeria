@@ -7,73 +7,51 @@ import './App.css'
 const CUSTOMERS = [
   { 
     id: 1,
-    name: 'Mandi',
-    cipherText: "Uif rvjdl cspxo gpy",
-    answer: "fox",
-    difficulty: 1
+    name: 'Shrey',
+    cipherText: "WoljUeQjbljBbkcFtpch",
+    answer: "stationary",
+    difficulty: 3,
+    hint: "Vigenere cipher with key 'hack'. Don't be still like paper..."
   },
   { 
     id: 2,
-    name: 'Tony',
-    cipherText: "Bsf zpv sfbez gps uif ofyu dibmmfohf?",
-    answer: "ready",
-    difficulty: 2
+    name: 'Puzzles',
+    cipherText: "KTQEYGYIZTKZLKQL",
+    answer: "star",
+    difficulty: 2,
+    hint: "Aristocrat cipher. Reach for the stars!"
   },
   { 
     id: 3,
-    name: 'Prudence',
-    cipherText: "Dbo zpv tpmwf uijt djqifs?",
-    answer: "solve",
-    difficulty: 3
+    name: 'Master',
+    cipherText: "pgjjgywgadbdaqhgdbn",
+    answer: "north",
+    difficulty: 4,
+    hint: "Affine cipher (slope 25, intercept 20). Follow your true north!"
   },
   {
     id: 4,
-    name: 'Cooper',
-    cipherText: "Gzrtzyk nx ymj gjxy lfrj!",
-    answer: "cipher",
-    difficulty: 3
+    name: 'The',
+    cipherText: "{[]}n|_'/^|=o°|_\\'o|_|here∂?|e|/-/£!2†lm30/\\/t}{iŝ",
+    answer: "unsolvable",
+    difficulty: 5,
+    hint: "This one's just for fun! Maybe try another customer..."
   },
   {
     id: 5,
-    name: 'Penny',
-    cipherText: "Nby mywlyn cm bupqus nblioab",
-    answer: "halfway",
-    difficulty: 4
+    name: 'Wise',
+    cipherText: "baaba baaaa aaaaa ababa aaaaa ababa aabaa baaaa abbab baaba baaaa aaaaa ababa aaaaa ababa aaaaa abaaa baaab aaaab aabaa baaba baaba aabaa baaaa baaba aabbb",
+    answer: "unsolvable",
+    difficulty: 5,
+    hint: "A very long Baconian message... maybe try another customer?"
   },
   {
     id: 6,
-    name: 'Rico',
-    cipherText: "Xlsks gkx dro locd myypso",
-    answer: "these",
-    difficulty: 2
-  },
-  {
-    id: 7,
-    name: 'Marty',
-    cipherText: "Gsqfyx qiwweki jsv csy",
-    answer: "secret",
-    difficulty: 3
-  },
-  {
-    id: 8,
-    name: 'Clover',
-    cipherText: "Qcaacih muugyjnyx",
-    answer: "mission",
-    difficulty: 4
-  },
-  {
-    id: 9,
-    name: 'Utah',
-    cipherText: "Vkdw lv wkh sdvvzrug?",
-    answer: "what",
-    difficulty: 2
-  },
-  {
-    id: 10,
-    name: 'Robby',
-    cipherText: "Frvpxwhu vflhqfh lv ixq!",
-    answer: "computer",
-    difficulty: 5
+    name: 'Final Challenge',
+    cipherText: "Using the three words you've collected, find the star that is both stationary and points north...",
+    answer: "polaris",
+    difficulty: 5,
+    hint: "Think about what star stays still and guides travelers north!"
   }
 ]
 
@@ -104,13 +82,15 @@ function Customer({ position, customerData, isLeaving }) {
     }
   })
 
+  const isSolvable = customerData.answer !== 'unsolvable'
+
   return (
     <group ref={groupRef} position={position}>
       {/* Body */}
       <mesh castShadow>
         <capsuleGeometry args={[0.5, 1, 8, 16]} />
         <meshStandardMaterial 
-          color="#4a90e2"
+          color={isSolvable ? "#4a90e2" : "#666666"}
           roughness={0.2}
           metalness={0.3}
         />
@@ -122,7 +102,7 @@ function Customer({ position, customerData, isLeaving }) {
         <mesh castShadow>
           <sphereGeometry args={[0.4, 32, 32]} />
           <meshStandardMaterial 
-            color="#ffdbac"
+            color={isSolvable ? "#ffdbac" : "#999999"}
             roughness={0.3}
             metalness={0.1}
           />
@@ -156,11 +136,13 @@ function Customer({ position, customerData, isLeaving }) {
       >
         <group>
           <mesh>
-            <boxGeometry args={[4, 1.4, 0.1]} />
+            <boxGeometry args={[4, isSolvable ? 1.8 : 1.4, 0.1]} />
             <meshStandardMaterial 
-              color="white"
+              color={isSolvable ? "white" : "#f0f0f0"}
               transparent
-              opacity={0.8}
+              opacity={0.15}
+              metalness={0.1}
+              roughness={0.1}
             />
           </mesh>
           <Text
@@ -168,17 +150,40 @@ function Customer({ position, customerData, isLeaving }) {
             fontSize={0.2}
             maxWidth={3.5}
             textAlign="center"
-            color="#2c3e50"
+            color="white"
+            font="/Inter-Bold.woff"
+            anchorY="middle"
+            outlineWidth={0.01}
+            outlineColor="#000000"
           >
             {customerData.cipherText}
           </Text>
           <Text
             position={[0, -0.3, 0.06]}
             fontSize={0.15}
-            color="#7f8c8d"
+            color="white"
+            font="/Inter-Medium.woff"
+            anchorY="middle"
+            outlineWidth={0.005}
+            outlineColor="#000000"
           >
             {customerData.name}
           </Text>
+          {isSolvable && customerData.hint && (
+            <Text
+              position={[0, -0.6, 0.06]}
+              fontSize={0.12}
+              maxWidth={3.5}
+              textAlign="center"
+              color="#ffd700"
+              font="/Inter-Medium.woff"
+              anchorY="middle"
+              outlineWidth={0.005}
+              outlineColor="#000000"
+            >
+              Hint: {customerData.hint}
+            </Text>
+          )}
         </group>
       </Float>
     </group>
@@ -188,30 +193,6 @@ function Customer({ position, customerData, isLeaving }) {
 function CafeDecor() {
   return (
     <group>
-      {/* Hanging Lamps */}
-      {[-3, 0, 3].map((x, i) => (
-        <group key={i} position={[x, 3, -1]}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 0.5, 16]} />
-            <meshStandardMaterial color="#2c3e50" />
-          </mesh>
-          <mesh position={[0, -0.5, 0]} castShadow>
-            <cylinderGeometry args={[0.3, 0.2, 0.4, 16]} />
-            <meshStandardMaterial 
-              color="#f1c40f"
-              emissive="#f1c40f"
-              emissiveIntensity={0.5}
-            />
-          </mesh>
-          <pointLight
-            position={[0, -0.5, 0]}
-            intensity={0.5}
-            distance={5}
-            color="#f1c40f"
-          />
-        </group>
-      ))}
-
       {/* Wall Decorations */}
       {[-6, -2, 2, 6].map((x, i) => (
         <group key={i} position={[x, 2, -4.8]}>
@@ -378,9 +359,10 @@ function Walls() {
         />
       </mesh>
 
-      {/* Side walls with windows */}
+      {/* Side walls with windows and doors */}
       {[-10, 10].map((x, i) => (
         <group key={i}>
+          {/* Main wall section */}
           <mesh position={[x, 3, 0]} rotation={[0, Math.PI / 2 * (i ? -1 : 1), 0]} receiveShadow>
             <boxGeometry args={[10, 10, 0.3]} />
             <meshStandardMaterial 
@@ -389,6 +371,7 @@ function Walls() {
               metalness={0.1}
             />
           </mesh>
+
           {/* Windows */}
           {[-2, 2].map((z, j) => (
             <mesh 
@@ -406,6 +389,34 @@ function Walls() {
               />
             </mesh>
           ))}
+
+          {/* Door */}
+          <group position={[x * 0.99, -0.5, -3]}>
+            {/* Door frame */}
+            <mesh receiveShadow>
+              <boxGeometry args={[0.2, 5, 3]} />
+              <meshStandardMaterial color="#4a3728" />
+            </mesh>
+            
+            {/* Door */}
+            <mesh 
+              position={[0, 0, 1.4]} 
+              rotation={[0, Math.PI * 0.2 * (i ? 1 : -1), 0]}
+              castShadow
+            >
+              <boxGeometry args={[0.1, 4.8, 2.8]} />
+              <meshStandardMaterial 
+                color="#8b4513"
+                metalness={0.3}
+                roughness={0.7}
+              />
+              {/* Door handle */}
+              <mesh position={[0.1, 0, -1]} castShadow>
+                <sphereGeometry args={[0.1, 16, 16]} />
+                <meshStandardMaterial color="#c0c0c0" metalness={0.8} roughness={0.2} />
+              </mesh>
+            </mesh>
+          </group>
         </group>
       ))}
     </group>
@@ -418,19 +429,16 @@ function Scene({ currentCustomer, customerPosition, isLeaving }) {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.8} />
       <SpotLight
         ref={spotLightRef}
         position={[0, 5, 0]}
         angle={0.6}
         penumbra={0.5}
-        intensity={1.2}
+        intensity={1.8}
         castShadow
         shadow-mapSize={[2048, 2048]}
       />
-      {/* Add additional accent lights */}
-      <pointLight position={[-5, 4, -3]} intensity={0.5} color="#ffd700" />
-      <pointLight position={[5, 4, -3]} intensity={0.5} color="#ff8c00" />
       <Floor />
       <Counter />
       <Walls />
@@ -560,6 +568,12 @@ export default function App() {
           shadows 
           camera={{ position: [0, 2, 3], fov: 75 }}
           gl={{ antialias: true }}
+          style={{ background: '#1a1a1a' }}
+          onCreated={({ gl }) => {
+            gl.setClearColor('#1a1a1a')
+            gl.shadowMap.enabled = true
+            gl.shadowMap.type = THREE.PCFSoftShadowMap
+          }}
         >
           <Scene
             currentCustomer={currentCustomer}
