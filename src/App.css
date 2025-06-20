@@ -64,7 +64,7 @@ body,
 }
 
 .game-ui .score {
-  background: rgba(0, 0, 0, 0.2);
+  background: #111;
   padding: 12px 24px;
   border-radius: 16px;
   font-weight: bold;
@@ -76,9 +76,22 @@ body,
   -webkit-backdrop-filter: blur(5px);
 }
 
+.phase-indicator {
+  background: #2c3e50;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  font-size: 1.1em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
 .feedback {
   position: fixed;
-  top: 100px;
+  bottom: 120px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--glass-bg);
@@ -389,10 +402,10 @@ h1 {
 }
 
 @keyframes fadeInOut {
-  0% { opacity: 0; transform: translate(-50%, -20px); }
+  0% { opacity: 0; transform: translate(-50%, 20px); }
   15% { opacity: 1; transform: translate(-50%, 0); }
   85% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, -20px); }
+  100% { opacity: 0; transform: translate(-50%, 20px); }
 }
 
 @keyframes glow {
@@ -468,4 +481,109 @@ h1 {
     padding: 12px 20px;
     font-size: 1em;
   }
+}
+
+.final-challenge-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--glass-bg);
+  padding: 30px;
+  border-radius: 20px;
+  font-size: 1.5em;
+  text-align: center;
+  z-index: 20;
+  box-shadow: 0 8px 24px var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  color: white;
+  max-width: 600px;
+}
+
+.word-display {
+  font-size: 2.5em;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.hangman-challenge {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--glass-bg);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  z-index: 20;
+  box-shadow: 0 8px 24px var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  color: white;
+  max-width: 800px;
+  min-width: 600px;
+}
+
+.hangman-word {
+  font-size: 2.5em;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.hangman-info {
+  margin-bottom: 30px;
+}
+
+.hangman-info p {
+  margin: 5px 0;
+  font-size: 1.2em;
+}
+
+.hangman-keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hangman-key {
+  padding: 12px 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.hangman-key:hover:not(:disabled) {
+  background: #357abd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.hangman-key:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.hangman-key.guessed {
+  background: #e74c3c;
+}
+
+.hangman-key.guessed:hover {
+  background: #c0392b;
 } 
