@@ -76,26 +76,34 @@ const PHASE_TWO_CUSTOMERS = [
   {
     id: 9,
     name: 'Troll',
-    cipherText: "This cipher is impossible to solve!",
-    answer: "unsolvable",
-    difficulty: 5,
-    hint: "Don't waste your time on this one..."
+    cipherText: "I want 3 orders of 173 fries and 179 mcnuggets. I don't care that you're an ice cream shop.",
+    answer: "underthesea",
+    difficulty: 4,
+    hint: "[9261,2744,64,125,5832,8000,512,125,6859,125,1]"
   },
   {
     id: 10,
     name: 'Joker',
-    cipherText: "🎭🎪🎨🎯🎲🎳🎴🎵🎶🎷🎸🎹🎺🎻🎼🎽🎾🎿🏀🏁🏂🏃🏄🏅🏆🏇🏈🏉🏊🏋🏌🏍🏎🏏",
-    answer: "unsolvable",
-    difficulty: 5,
-    hint: "Just emojis... nothing to decode here!"
+    cipherText: "YptrYmWmVwFGV",
+    answer: "hack",
+    difficulty: 2,
+    hint: "The key lies in this years theme"
   },
   {
     id: 11,
-    name: 'Final Phase 2',
-    cipherText: "Combine the two real words you found in this phase",
+    name: 'dk',
+    cipherText: "QFDZLKHZQPMXZULBKH",
+    answer: "archive",
+    difficulty: 3,
+    hint: "Of the internet"
+  },
+  {
+    id: 12,
+    name: 'Final',
+    cipherText: "Use the ciphers from this phase to find the key word to unlock the freezer",
     answer: "2022",
     difficulty: 5,
-    hint: "Think about the year..."
+    hint: "HackMIT :)"
   }
 ]
 
@@ -511,6 +519,7 @@ export default function App() {
   const [wordDisplay, setWordDisplay] = useState('')
   const [showSecondFreezer, setShowSecondFreezer] = useState(false)
   const [isSecondFreezerLocked, setIsSecondFreezerLocked] = useState(true)
+  const [showWelcome, setShowWelcome] = useState(true)
 
   // Update word display when final word changes
   useEffect(() => {
@@ -524,13 +533,24 @@ export default function App() {
   }, [finalWord])
 
   useEffect(() => {
-    const currentCustomers = currentPhase === 1 ? PART_ONE_CUSTOMERS : PHASE_TWO_CUSTOMERS.slice(0, 4);
-    const nonTrollCustomers = currentCustomers.filter(customer => customer.answer !== 'unsolvable');
-    const allNonTrollSolved = nonTrollCustomers.every(customer => solvedCustomers.has(customer.id));
+    if (currentPhase === 1) {
+      const currentCustomers = PART_ONE_CUSTOMERS;
+      const nonTrollCustomers = currentCustomers.filter(customer => customer.answer !== 'unsolvable');
+      const allNonTrollSolved = nonTrollCustomers.every(customer => solvedCustomers.has(customer.id));
 
-    if (allNonTrollSolved && isFreezerLocked) {
-      setIsFreezerLocked(false)
-      setFeedback(`Phase ${currentPhase} non-troll ciphers solved! Click the freezer for the final challenge.`)
+      if (allNonTrollSolved && isFreezerLocked) {
+        setIsFreezerLocked(false)
+        setFeedback(`Phase 1 ciphers solved! Freezer unlocked.`)
+      }
+    } else if (currentPhase === 2) {
+      // For phase 2, specifically check if customers 9, 10, 11 are solved
+      const requiredCustomers = [9, 10, 11];
+      const allRequiredSolved = requiredCustomers.every(id => solvedCustomers.has(id));
+
+      if (allRequiredSolved && isFreezerLocked) {
+        setIsFreezerLocked(false)
+        setFeedback(`Phase 2 ciphers solved! Freezer unlocked.`)
+      }
     }
   }, [solvedCustomers, isFreezerLocked, currentPhase])
 
@@ -543,7 +563,7 @@ export default function App() {
         if (currentPhase === 1) {
           currentCustomers = PART_ONE_CUSTOMERS;
         } else if (currentPhase === 2) {
-          currentCustomers = PHASE_TWO_CUSTOMERS.slice(0, 4);
+          currentCustomers = PHASE_TWO_CUSTOMERS.slice(0, 5);
         }
         
         const availableCustomers = currentCustomers.filter(
@@ -671,7 +691,7 @@ export default function App() {
           setTimeout(() => setFeedback(''), 3000);
         } else if (gameState === 'final_challenge_second_freezer') {
           setScore(prevScore => prevScore + 2000);
-          setFeedback('Congratulations! You have completed the game and found Kirsten Carthew!');
+          setFeedback('Congratulations! You have completed the game!');
           setGameState('game_over');
         }
       } else {
@@ -717,12 +737,65 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#1a1a1a' }}>
+      {showWelcome && (
+        <div className="welcome-overlay">
+          <div className="welcome-content">
+            <div className="welcome-title">🍦 Welcome to Papa's Cipheria! 🍦</div>
+            <div className="welcome-message">
+              Ready to solve some challenging ciphers? Here's how the game works:
+            </div>
+            <div className="welcome-instructions">
+              <div className="instruction-step">
+                <div className="step-number">1</div>
+                <span>Solve ciphers from customers in <strong>Phase 1</strong> to unlock the first freezer</span>
+              </div>
+              <div className="instruction-step">
+                <div className="step-number">2</div>
+                <span>Complete the freezer challenge to advance to <strong>Phase 2</strong></span>
+              </div>
+              <div className="instruction-step">
+                <div className="step-number">3</div>
+                <span>Solve more ciphers in Phase 2 to unlock the second freezer</span>
+              </div>
+              <div className="instruction-step">
+                <div className="step-number">4</div>
+                <span>Complete the final freezer challenge to finish the game!</span>
+              </div>
+            </div>
+            <div className="welcome-message" style={{ fontSize: '1.1em', color: '#e8f4fd' }}>
+              💡 Tip: Some customers might be trolls... focus on the solvable ciphers!
+            </div>
+            <button 
+              className="start-game-btn"
+              onClick={() => setShowWelcome(false)}
+            >
+              Start Game! 🚀
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="game-ui">
         <h1>Papa's Cipheria</h1>
         <div className="score">Score: {score}</div>
         <div className="phase-indicator">Phase: {currentPhase}</div>
       </div>
       {feedback && <div className="feedback">{feedback}</div>}
+      
+      {gameState === 'game_over' && (
+        <div className="game-completion-overlay">
+          <div className="game-completion-content">
+            <div className="game-completion-title">🎉 Congratulations! 🎉</div>
+            <div className="game-completion-message">
+              You've successfully completed Papa's Cipheria!
+            </div>
+            <div className="final-score">Final Score: {score} points</div>
+            <div className="game-completion-message" style={{ fontSize: '1.2em', color: '#e8f4fd' }}>
+              Looking forward to seeing you guys at HackMIT 💙!
+            </div>
+          </div>
+        </div>
+      )}
       
       {(gameState === 'final_challenge_phase1' || gameState === 'final_challenge_phase2' || gameState === 'final_challenge_second_freezer') && (
         <div className="final-challenge-prompt">
@@ -733,7 +806,7 @@ export default function App() {
               ? "Think about your previous ciphers..." 
               : gameState === 'final_challenge_phase2'
               ? "Think about the year..."
-              : "Director + 2022 + polaris"
+              : "Hint: Director"
             }
           </p>
         </div>
