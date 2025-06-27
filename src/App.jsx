@@ -208,6 +208,8 @@ function Customer({ position, customerData, isLeaving }) {
             color="white"
             font="/Inter-Bold.woff"
             anchorY="middle"
+            userSelect="text"
+            style={{ pointerEvents: 'auto' }}
           >
             {customerData.cipherText}
           </Text>
@@ -220,6 +222,8 @@ function Customer({ position, customerData, isLeaving }) {
               color="#ffd700"
               font="/Inter-Medium.woff"
               anchorY="middle"
+              userSelect="text"
+              style={{ pointerEvents: 'auto' }}
             >
               Hint: {customerData.hint}
             </Text>
@@ -593,6 +597,7 @@ export default function App() {
         
         setCurrentCustomer(nextCustomer);
         setGameState('entering')
+        setCustomerPosition([0, -0.5, -8])
         
         let pos = -8
         const enterInterval = setInterval(() => {
@@ -625,7 +630,7 @@ export default function App() {
         setUserInput('')
         setIsLeaving(false)
         setGameState('waiting')
-        setCustomerPosition([0, -0.5, -3])
+        setCustomerPosition([0, -0.5, -8])
         setTimeout(() => setFeedback(''), 2000)
       } else {
         pos -= 0.2
@@ -779,6 +784,16 @@ export default function App() {
         <h1>Papa's Cipheria</h1>
         <div className="score">Score: {score}</div>
         <div className="phase-indicator">Phase: {currentPhase}</div>
+        {currentCustomer && gameState === 'serving' && (
+          <button 
+            className="copy-btn"
+            onClick={() => {
+              navigator.clipboard.writeText(currentCustomer.cipherText);
+            }}
+          >
+            📋 Copy Text
+          </button>
+        )}
       </div>
       {feedback && <div className="feedback">{feedback}</div>}
       
